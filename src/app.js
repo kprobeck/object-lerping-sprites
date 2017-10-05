@@ -4,7 +4,7 @@ const xxh = require('xxhashjs');
 
 const fs = require('fs');
 
-const walkImage = fs.readFileSync(`${__dirname}/../client/walk.png`);
+const walkImage = fs.readFileSync(`${__dirname}/../hosted/walk.png`);
 
 const PORT = process.env.PORT || process.env.NODE_PORT || 3000;
 
@@ -13,8 +13,22 @@ const handler = (req, res) => {
     res.writeHead(200, {'Content-Type': 'image/png'});
     res.end(walkImage);
   }
+  else if (req.url === '/bundle.js') {
+    fs.readFile(`${__dirname}/../hosted/bundle.js`, (err, data) => {
+      // if err, throw it for now
+      if (err) {
+        throw err;
+      }
+      res.writeHead(200);
+      res.end(data);
+    });  
+  }
   else {
-    fs.readFile(`${__dirname}/../client/index.html`, (err, data) => {
+    /** read our file ASYNCHRONOUSLY from the file system. This is much
+       lower performance, but allows us to reload the page changes during
+       development. First parameter is the file to read, second is the
+       callback to run when it's read ASYNCHRONOUSLY **/
+    fs.readFile(`${__dirname}/../hosted/index.html`, (err, data) => {
       // if err, throw it for now
       if (err) {
         throw err;
@@ -35,7 +49,7 @@ io.on('connection', (sock) => {
   socket.join('room1');
   
   socket.square = {
-    hash: xxh.h32(`${socket.id}${Date.now()}`, 0xCAFEBABE).toString(16),
+    hash: xxh.h32(`${socket.id}${Date.now()}`, 0xDEADBEEF).toString(16),
     lastUpdate: new Date().getTime(),
     x: 0,
     y: 0,
