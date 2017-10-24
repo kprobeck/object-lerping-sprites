@@ -158,46 +158,48 @@ io.on('connection', (sock) => {
     socket.square = data;
     // we do update the time though, so we know the last time this is updated
     socket.square.lastUpdate = new Date().getTime();
-    
+
     /* CALCULATE GRAVITY */
-    
-    
+
+
     // first, check to see if the player is in fact on the ground
-    if(socket.square.y >= 398) {
+    if (socket.square.y >= 398) {
       socket.square.isOnGround = true;
     }
-  
+
     // next, check for gravity. If they player is in the air, make sure they are moving down
-    if(socket.square.isFalling && !socket.square.isJumping) {
+    if (socket.square.isFalling && !socket.square.isJumping) {
       socket.square.moveDown = true;
-    } else if (socket.square.isJumping) { // check to see if they player is jumping, then make sure they are moving up
+    } else if (socket.square.isJumping) { // check to see if they player is jumping, then make
+      // sure they are moving up
       socket.square.moveUp = true;
       socket.square.isOnGround = false;
     }
 
-	//if the user is going up but not off screen
-	//move their destination up (so we can animate)
-	//from our current Y
-    //this is only for having the player jump
-	if (socket.square.moveUp && socket.square.destY > 0 && socket.square.airTime > 0) {
-		socket.square.destY -= 20;
-        socket.square.airTime--;
-	}
+	// if the user is going up but not off screen
+	// move their destination up (so we can animate)
+	// from our current Y
+    // this is only for having the player jump
+    if (socket.square.moveUp && socket.square.destY > 0 && socket.square.airTime > 0) {
+      socket.square.destY -= 20;
+      socket.square.airTime--;
+    }
 
-	//if the user is going down but not off screen
-	//move their destination down (so we can animate)
-	//from our current y
-	if (socket.square.moveDown && socket.square.destY < 400) {
-		socket.square.destY += 10;
+	// if the user is going down but not off screen
+	// move their destination down (so we can animate)
+	// from our current y
+    if (socket.square.moveDown && socket.square.destY < 400) {
+      socket.square.destY += 10;
         // check to see if square has hit the floor. This is to stop the simulated gravity
-        if(socket.square.destY >= 400) {
-          socket.square.isFalling = false;
-          socket.square.moveDown = false;
-        }
-	}
-  
-    // check to see if airTime has completed. This is to see if the jump should be ended and should start to fall
-    if(socket.square.airTime === 0) {
+      if (socket.square.destY >= 400) {
+        socket.square.isFalling = false;
+        socket.square.moveDown = false;
+      }
+    }
+
+    // check to see if airTime has completed. This is to see if the jump should be
+    // ended and should start to fall
+    if (socket.square.airTime === 0) {
       socket.square.isJumping = false;
       socket.square.moveUp = false;
       socket.square.isFalling = true;
