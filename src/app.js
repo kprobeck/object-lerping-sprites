@@ -199,7 +199,7 @@ io.on('connection', (sock) => {
 
     // check to see if airTime has completed. This is to see if the jump should be
     // ended and should start to fall
-    if (.square.airTime === 0) {
+    if (socket.square.airTime === 0) {
       socket.square.isJumping = false;
       socket.square.moveUp = false;
       socket.square.isFalling = true;
