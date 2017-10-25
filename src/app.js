@@ -205,7 +205,7 @@ io.on('connection', (sock) => {
       socket.square.isFalling = true;
       socket.square.airTime = 10;
     }
-    
+
     socket.square.alpha = 0;
 
     // could send to everyone including ourselves, but we probably don't need to
@@ -216,8 +216,8 @@ io.on('connection', (sock) => {
     // instead we will broadcast to everyone EXCEPT the user who sent us the data
     // In some implementations we may prefer the emit to all to confirm with the
     // client who sent it. Otherwise it's unnecessary traffic, so I skipped it.
-    
-    //UPDATE: boradcast to everyone so the user can see the effects of gravity
+
+    // UPDATE: boradcast to everyone so the user can see the effects of gravity
     io.sockets.in('room1').emit('updatedMovement', socket.square);
 
     // If we as the server want to forcefully override a person's screen

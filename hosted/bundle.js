@@ -369,10 +369,12 @@ var keyDownHandler = function keyDownHandler(e) {
 	// A OR LEFT
 	if (keyPressed === 65 || keyPressed === 37) {
 		square.moveLeft = true;
+		console.log('moving left');
 	}
 	// D OR RIGHT
 	else if (keyPressed === 68 || keyPressed === 39) {
 			square.moveRight = true;
+			console.log('moving right');
 		}
 		// SpaceBar, JUMP
 		else if (keyPressed === 32) {
@@ -407,10 +409,12 @@ var keyUpHandler = function keyUpHandler(e) {
 	// A OR LEFT
 	if (keyPressed === 65 || keyPressed === 37) {
 		square.moveLeft = false;
+		console.log('no long moving left');
 	}
 	// D OR RIGHT
 	else if (keyPressed === 68 || keyPressed === 39) {
 			square.moveRight = false;
+			console.log('no long moving right');
 		}
 };
 
