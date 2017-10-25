@@ -219,7 +219,6 @@ var updatePosition = function updatePosition() {
 
 	//reset our alpha since we are moving
 	//want to reset the animation to keep playing
-	square.alpha = 0;
 
 
 	socket.emit('movementUpdate', square);
