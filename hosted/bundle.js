@@ -113,12 +113,12 @@ var update = function update(data) {
 	square.moveRight = data.moveRight;
 	square.moveDown = data.moveDown;
 	square.moveUp = data.moveUp;
-    
-    // adding data for isFalling and isJumping, to test for gravity
-    square.isFalling = data.isFalling;
-    square.isJumping = data.isJumping;
-    square.airTime = data.airTime;
-    square.isOnGround = data.isOnGround;
+
+	// adding data for isFalling, isJumping, airTime and isOnGround to test for gravity
+	square.isFalling = data.isFalling;
+	square.isJumping = data.isJumping;
+	square.airTime = data.airTime;
+	square.isOnGround = data.isOnGround;
 };
 
 //remove a user object by the object's id
@@ -168,13 +168,30 @@ var lerp = function lerp(v0, v1, alpha) {
 
 //update this user's position
 var updatePosition = function updatePosition() {
-  
 	//grab our user's square based on our user's id (hash)
 	var square = squares[hash];
 
 	//set our user's previous positions to their last positions
 	square.prevX = square.x;
 	square.prevY = square.y;
+
+	/* TAKING OUT MOVEMENT UP AND DOWN. REDONE WITH GRAVITY/JUMP
+ 
+ //if the user is going up but not off screen
+ //move their destination up (so we can animate)
+ //from our current Y
+ if(square.moveUp && square.destY > 0) {
+ square.destY -= 2;
+ }
+ 
+ //if the user is going down but not off screen
+ //move their destination down (so we can animate)
+ //from our current y
+ if(square.moveDown && square.destY < 400) {
+ square.destY += 2;
+ }
+ 
+ */
 
 	//if the user is going left but not off screen
 	//move their destination left (so we can animate)
@@ -190,26 +207,22 @@ var updatePosition = function updatePosition() {
 		square.destX += 2;
 	}
 
-  // commenting out animations that would have the user be drawn moving in an odd direction, meant to
-  // look like jumping, not moving up then back down
-  
-// 	//if user is moving and left
-// 	if (square.moveUp && square.moveLeft) square.direction = directions.UPLEFT;
-// 
-// 	//if user is moving up and right
-// 	if (square.moveUp && square.moveRight) square.direction = directions.UPRIGHT;
-// 
-// 	//if user is moving down and left
-// 	if (square.moveDown && square.moveLeft) square.direction = directions.DOWNLEFT;
-// 
-	// //if user is moving down and right
-	// if (square.moveDown && square.moveRight) square.direction = directions.DOWNRIGHT;
-
-	//if user is just moving down
-	// if (square.moveDown && !(square.moveRight || square.moveLeft)) square.direction = directions.DOWN;
-
-	//if user is just moving up
-	// if (square.moveUp && !(square.moveRight || square.moveLeft)) square.direction = directions.UP;
+	/* ONLY WANT LEFT AND RIGHT MOVEMENT SPRITES
+ 
+ //if user is moving and left
+ if(square.moveUp && square.moveLeft) square.direction = directions.UPLEFT;
+ 
+ //if user is moving up and right
+ if(square.moveUp && square.moveRight) square.direction = directions.UPRIGHT;
+   //if user is moving down and left
+ if(square.moveDown && square.moveLeft) square.direction = directions.DOWNLEFT;
+   //if user is moving down and right
+ if(square.moveDown && square.moveRight) square.direction = directions.DOWNRIGHT;
+   //if user is just moving down
+ if(square.moveDown && !(square.moveRight || square.moveLeft)) square.direction = directions.DOWN;
+   //if user is just moving up
+ if(square.moveUp && !(square.moveRight || square.moveLeft)) square.direction = directions.UP;
+   */
 
 	//if user is just moving left
 	if (square.moveLeft && !(square.moveUp || square.moveDown)) square.direction = directions.LEFT;
@@ -219,8 +232,15 @@ var updatePosition = function updatePosition() {
 
 	//reset our alpha since we are moving
 	//want to reset the animation to keep playing
+	square.alpha = 0;
 
-
+	/**
+ normally we could emit here for 60fps (WE NOW ARE)
+ since this is invoked by redraw (requestAnimationFrame).
+ 
+ NOTICE! - We have moved this emit to sendWithLag to 
+ 	  simulate lag based on a timer. 
+ **/
 	socket.emit('movementUpdate', square);
 };
 
@@ -346,22 +366,21 @@ var keyDownHandler = function keyDownHandler(e) {
    not just up/down/right/left
  **/
 
-
 	// A OR LEFT
 	if (keyPressed === 65 || keyPressed === 37) {
-			square.moveLeft = true;
+		square.moveLeft = true;
+	}
+	// D OR RIGHT
+	else if (keyPressed === 68 || keyPressed === 39) {
+			square.moveRight = true;
 		}
-		// D OR RIGHT
-		else if (keyPressed === 68 || keyPressed === 39) {
-				square.moveRight = true;
-			}
-			// SpaceBar, JUMP
-			else if (keyPressed === 32) {
-					if(square.isOnGround) {
-                      square.isJumping = true;
-                      square.isOnGround = false;
-                    }
+		// SpaceBar, JUMP
+		else if (keyPressed === 32) {
+				if (square.isOnGround) {
+					square.isJumping = true;
+					square.isOnGround = false;
 				}
+			}
 
 	//if one of these keys is down, let's cancel the browsers
 	//default action so the page doesn't try to scroll on the user
@@ -384,24 +403,24 @@ var keyUpHandler = function keyUpHandler(e) {
    This will allow for angled movement 
    not just up/down/right/left
  **/
-  
-  // A OR LEFT
+
+	// A OR LEFT
 	if (keyPressed === 65 || keyPressed === 37) {
-			square.moveLeft = false;
+		square.moveLeft = false;
+	}
+	// D OR RIGHT
+	else if (keyPressed === 68 || keyPressed === 39) {
+			square.moveRight = false;
 		}
-		// D OR RIGHT
-		else if (keyPressed === 68 || keyPressed === 39) {
-				square.moveRight = false;
-			}
 };
 
 //function to send this user's updates
 //NOTICE - this is pulled out into a function
 //         we can call to simulate lag.
-var sendWithLag = function sendWithLag() {
-	//send this user's updated position
-	socket.emit('movementUpdate', squares[hash]);
-};
+/*const sendWithLag = () => {
+  //send this user's updated position
+  socket.emit('movementUpdate', squares[hash]);
+};*/
 
 var init = function init() {
 	walkImage = document.querySelector('#walk');

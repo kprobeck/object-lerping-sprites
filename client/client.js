@@ -113,6 +113,12 @@ const update = (data) => {
   square.moveRight = data.moveRight;
   square.moveDown = data.moveDown;
   square.moveUp = data.moveUp;
+  
+  // adding data for isFalling, isJumping, airTime and isOnGround to test for gravity
+  square.isFalling = data.isFalling;
+  square.isJumping = data.isJumping;
+  square.airTime = data.airTime;
+  square.isOnGround = data.isOnGround;
 };
 
 //remove a user object by the object's id
@@ -169,6 +175,8 @@ const updatePosition = () => {
   square.prevX = square.x;
   square.prevY = square.y;
 
+  /* TAKING OUT MOVEMENT UP AND DOWN. REDONE WITH GRAVITY/JUMP
+  
   //if the user is going up but not off screen
   //move their destination up (so we can animate)
   //from our current Y
@@ -183,6 +191,8 @@ const updatePosition = () => {
 	square.destY += 2;
   }
   
+  */
+  
   //if the user is going left but not off screen
   //move their destination left (so we can animate)
   //from our current x
@@ -196,6 +206,8 @@ const updatePosition = () => {
   if(square.moveRight && square.destX < 400) {
 	square.destX += 2;
   }
+  
+  /* ONLY WANT LEFT AND RIGHT MOVEMENT SPRITES
   
   //if user is moving and left
   if(square.moveUp && square.moveLeft) square.direction = directions.UPLEFT;
@@ -215,6 +227,8 @@ const updatePosition = () => {
   //if user is just moving up
   if(square.moveUp && !(square.moveRight || square.moveLeft)) square.direction = directions.UP;
 
+  */
+
   //if user is just moving left
   if(square.moveLeft && !(square.moveUp || square.moveDown)) square.direction = directions.LEFT;
 
@@ -226,13 +240,13 @@ const updatePosition = () => {
   square.alpha = 0;
 
   /**
-	normally we could emit here for 60fps 
+	normally we could emit here for 60fps (WE NOW ARE)
 	since this is invoked by redraw (requestAnimationFrame).
 	
 	NOTICE! - We have moved this emit to sendWithLag to 
 			  simulate lag based on a timer. 
   **/
-  //socket.emit('movementUpdate', square);
+  socket.emit('movementUpdate', square);
 };
 
 //redraw our player objects (requestAnimationFrame)
@@ -359,22 +373,21 @@ const keyDownHandler = (e) => {
 	  not just up/down/right/left
 	**/
   
-	// W OR UP
-	if(keyPressed === 87 || keyPressed === 38) {
-	  square.moveUp = true;
-	}
 	// A OR LEFT
-	else if(keyPressed === 65 || keyPressed === 37) {
-	  square.moveLeft = true;
-	}
-	// S OR DOWN
-	else if(keyPressed === 83 || keyPressed === 40) {
-	  square.moveDown = true;
-	}
-	// D OR RIGHT
-	else if(keyPressed === 68 || keyPressed === 39) {
-	  square.moveRight = true;
-	}
+	if (keyPressed === 65 || keyPressed === 37) {
+			square.moveLeft = true;
+		}
+		// D OR RIGHT
+		else if (keyPressed === 68 || keyPressed === 39) {
+				square.moveRight = true;
+			}
+			// SpaceBar, JUMP
+			else if (keyPressed === 32) {
+					if(square.isOnGround) {
+                      square.isJumping = true;
+                      square.isOnGround = false;
+                    }
+				}
   
 	//if one of these keys is down, let's cancel the browsers
 	//default action so the page doesn't try to scroll on the user
@@ -398,31 +411,23 @@ const keyUpHandler = (e) => {
 	  not just up/down/right/left
 	**/
 
-	// W OR UP
-	if(keyPressed === 87 || keyPressed === 38) {
-	  square.moveUp = false;
-	}
 	// A OR LEFT
-	else if(keyPressed === 65 || keyPressed === 37) {
-	  square.moveLeft = false;
-	}
-	// S OR DOWN
-	else if(keyPressed === 83 || keyPressed === 40) {
-	  square.moveDown = false;
-	}
-	// D OR RIGHT
-	else if(keyPressed === 68 || keyPressed === 39) {
-	  square.moveRight = false;
-	}       
+	if (keyPressed === 65 || keyPressed === 37) {
+			square.moveLeft = false;
+		}
+		// D OR RIGHT
+		else if (keyPressed === 68 || keyPressed === 39) {
+				square.moveRight = false;
+			}      
 };
 
 //function to send this user's updates
 //NOTICE - this is pulled out into a function
 //         we can call to simulate lag.
-const sendWithLag = () => {
+/*const sendWithLag = () => {
   //send this user's updated position
   socket.emit('movementUpdate', squares[hash]);
-};
+};*/
 
 const init = () => {
 	walkImage = document.querySelector('#walk');
@@ -450,7 +455,7 @@ const init = () => {
 		and the less accurate the interpolation.
 	  **/
 	  //EVEN WITH 100ms
-	  setInterval(sendWithLag, 100);
+	  // setInterval(sendWithLag, 100);
 	});  
 	
 	//when the socket receives a 'joined'
