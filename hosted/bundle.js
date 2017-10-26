@@ -121,6 +121,28 @@ var update = function update(data) {
 	square.isOnGround = data.isOnGround;
 };
 
+// function to update gravity on the user
+var updateGravity = function updateGravity(data) {
+
+	// check to see if time is appropriate / not too old
+	if (squares[data.hash].lastUpdate >= data.lastUpdate) {
+		return;
+	}
+
+	var square = squares[data.hash];
+
+	// update info given by gravity calculation
+	square.moveDown = data.moveDown;
+	square.moveUp = data.moveUp;
+	square.isFalling = data.isFalling;
+	square.isJumping = data.isJumping;
+	square.airTime = data.airTime;
+	square.isOnGround = data.isOnGround;
+	square.destY = data.destY;
+
+	square.alpha = 0;
+};
+
 //remove a user object by the object's id
 //id is the hash from the server of an object
 var removeUser = function removeUser(hash) {
@@ -461,6 +483,9 @@ var init = function init() {
 	//when the socket receives an   'updatedMovement'
 	//event from the server, call update
 	socket.on('updatedMovement', update);
+
+	// gravity
+	socket.on('updatedGravity', updateGravity);
 
 	//when the socket receives a 'left'
 	//event from the server, call removeUser

@@ -206,7 +206,18 @@ io.on('connection', (sock) => {
       socket.square.airTime = 10;
     }
 
-    socket.square.alpha = 0;
+    // make an object holding all the info we need to potentially change based on gravity
+    const dataForGravity = {
+      destY: socket.square.destY,
+      airTime: socket.square.airTime,
+      isFalling: socket.square.isFalling,
+      isJumping: socket.square.isJumping,
+      isOnGround: socket.square.isOnGround,
+      moveUp: socket.square.moveUp,
+      moveDown: socket.square.moveDown,
+      hash: socket.square.hash,
+      lastUpdate: socket.square.lastUpdate,
+    };
 
     // could send to everyone including ourselves, but we probably don't need to
     // That user should already have the latest info of themselves
@@ -217,8 +228,11 @@ io.on('connection', (sock) => {
     // In some implementations we may prefer the emit to all to confirm with the
     // client who sent it. Otherwise it's unnecessary traffic, so I skipped it.
 
-    // UPDATE: boradcast to everyone so the user can see the effects of gravity
-    io.sockets.in('room1').emit('updatedMovement', socket.square);
+    // UPDATE: broadcast to everyone so the user can see the effects of gravity
+    socket.broadcast.emit('updatedMovement', socket.square);
+
+    //  only update the current users' necessary info
+    socket.emit('updatedGravity', dataForGravity);
 
     // If we as the server want to forcefully override a person's screen
     // (resetting their position on their screen) because of collision
